@@ -8,6 +8,7 @@ project(Scream
     HOMEPAGE_URL "https://github.com/Cure-Audio/Scream"
     LANGUAGES C)
 set(COMPANY_NAME "Cure Audio")
+option(SCREAM_INSTALL_PLUGINS "Copy built macOS plugins to the user plugin directories" ON)
 
 set(PRODUCT_NAME ${PROJECT_NAME}) # used by info.plist
 set(PRODUCT_COPYRIGHT ${COMPANY_NAME})
@@ -272,18 +273,21 @@ if (APPLE)
     target_precompile_headers(${PROJECT_NAME}_clap PRIVATE src/common.h)
     target_precompile_headers(${PROJECT_NAME}_vst3 PRIVATE src/common.h)
 
-    add_custom_command(TARGET ${PROJECT_NAME}_auv2 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.component to ~/Library/Audio/Plug-Ins/Components/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.component" "~/Library/Audio/Plug-Ins/Components/${PROJECT_NAME}.component"
-    )
-    add_custom_command(TARGET ${PROJECT_NAME}_clap POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.clap to ~/Library/Audio/Plug-Ins/CLAP/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.clap" "~/Library/Audio/Plug-Ins/CLAP/${PROJECT_NAME}.clap"
-    )
-    add_custom_command(TARGET ${PROJECT_NAME}_vst3 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.vst3 to ~/Library/Audio/Plug-Ins/VST3/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.vst3" "~/Library/Audio/Plug-Ins/VST3/${PROJECT_NAME}.vst3"
-    )
+    if(SCREAM_INSTALL_PLUGINS)
+        add_custom_command(TARGET ${PROJECT_NAME}_auv2 POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.component to ~/Library/Audio/Plug-Ins/Components/"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.component" "~/Library/Audio/Plug-Ins/Components/${PROJECT_NAME}.component"
+        )
+        add_custom_command(TARGET ${PROJECT_NAME}_clap POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.clap to ~/Library/Audio/Plug-Ins/CLAP/"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.clap" "~/Library/Audio/Plug-Ins/CLAP/${PROJECT_NAME}.clap"
+        )
+        add_custom_command(TARGET ${PROJECT_NAME}_vst3 POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.vst3 to ~/Library/Audio/Plug-Ins/VST3/"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.vst3" "~/Library/Audio/Plug-Ins/VST3/${PROJECT_NAME}.vst3"
+        )
+    endif()
+
 elseif(WIN32)
     add_library(${PROJECT_NAME}_plugin MODULE
         ${PLUGIN_SOURCES}

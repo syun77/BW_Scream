@@ -117,3 +117,23 @@ sh ./shaders.sh
 cmake -B build -G Ninja .
 cmake --build build
 ```
+
+
+#### macOS: build CLAP only
+
+With `sokol-shdc` available on `PATH`, build a Release universal binary
+(Apple Silicon and Intel) without copying plugins into your user Library:
+
+```sh
+sokol-shdc -i src/shaders/shaders.glsl -o src/shaders/shaders.glsl.h -l metal_macos
+sokol-shdc -i modules/xvg/xvg_shaders.glsl -o src/shaders/xvg_shaders.glsl.h -l metal_macos
+cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DSCREAM_INSTALL_PLUGINS=OFF
+cmake --build build --target Scream_clap --parallel
+codesign --force --sign - --timestamp=none build/Release/Scream.clap
+```
+
+The output is `build/Release/Scream.clap`. Copy the entire bundle into
+`~/Library/Audio/Plug-Ins/CLAP/` and rescan plugins in your CLAP host.
+The signature above is a local ad-hoc signature; it is not Developer ID signing
+or Apple notarization. `SCREAM_INSTALL_PLUGINS` defaults to `ON`, preserving
+the existing automatic installation behavior on macOS.
